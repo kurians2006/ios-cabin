@@ -90,7 +90,29 @@
     frame.size = self.scrollView.frame.size;
     [self.scrollView scrollRectToVisible:frame animated:YES];
     self.pageControlIsChangingPage = YES;
+    [self animateSubViews];
 }
+
+-(void) animateSubViews
+{
+    int buffer = 10;
+    CGRect frame = CGRectMake((self.pageControl.currentPage * self.scrollView.frame.size.width)-buffer, 0, self.scrollView.frame.size.width + buffer, self.scrollView.frame.size.height);
+    [UIView animateWithDuration:0.4
+                     animations:^{
+                         for (UIView *view in self.scrollView.subviews)
+                         {
+                             if (CGRectContainsRect(frame, view.frame))
+                             {
+                                 [view setAlpha:1.0];
+                             }
+                             else
+                             {
+                                 [view setAlpha:0.1];
+                             }
+                         }
+                     }];
+}
+
 
 #pragma scrollviewdelegate
 
@@ -103,6 +125,8 @@
     //switch page at 50% across
     int page = floor((scrollView.contentOffset.x - pageWidth / 2) / pageWidth) + 1;
     self.pageControl.currentPage = page;
+    //Call to animate
+    [self animateSubViews];
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
