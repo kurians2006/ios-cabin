@@ -17,6 +17,7 @@
 
 #define PAGECONTROL_DOT_WIDTH 20
 #define PAGECONTROL_HEIGHT 20
+#define PAGESCROLLINTERVAL 5
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -29,8 +30,22 @@
         [self addSubview:self.scrollView];
         [self addSubview:self.pageControl];
         self.scrollView.delegate = self;
+        
     }
     return self;
+}
+
+-(void)SetAutoScrollIsON:(BOOL)isOn withInterval:(int)interval
+{
+    NSTimer *timer;
+    if (isOn)
+    {
+        timer = [NSTimer scheduledTimerWithTimeInterval:interval target:self selector:@selector(scrollingTimer) userInfo:nil repeats:YES];
+    }
+    else
+    {
+        (timer)?[timer invalidate]:nil;
+    }
 }
 
 
@@ -111,6 +126,27 @@
                              }
                          }
                      }];
+}
+
+
+- (void)scrollingTimer {
+    // access the scroll view with the tag
+    UIScrollView *scrMain = self.scrollView;//(UIScrollView*) [self.view viewWithTag:1];
+    // same way, access pagecontroll access
+    UIPageControl *pgCtr = self.pageControl;//(UIPageControl*) [self.view viewWithTag:12];
+    // get the current offset ( which page is being displayed )
+    CGFloat contentOffset = scrMain.contentOffset.x;
+    // calculate next page to display
+    int nextPage = (int)(contentOffset/scrMain.frame.size.width) + 1 ;
+    // if page is not 10, display it
+    if( nextPage!=self.pageControl.numberOfPages)  {
+        [scrMain scrollRectToVisible:CGRectMake(nextPage*scrMain.frame.size.width, 0, scrMain.frame.size.width, scrMain.frame.size.height) animated:YES];
+        pgCtr.currentPage=nextPage;
+        // else start sliding form 1 :)
+    } else {
+        [scrMain scrollRectToVisible:CGRectMake(0, 0, scrMain.frame.size.width, scrMain.frame.size.height) animated:NO];
+        pgCtr.currentPage=0;
+    }
 }
 
 
